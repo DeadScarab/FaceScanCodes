@@ -1,0 +1,61 @@
+function [wEyes, wNose, wMouth, wFace] = getClosestFaces(img_name, dbFolder, n)
+% Finds closest indices using PCA/SSIM measure. Specify:
+% img_name - testimage; n - database size
+% Assuming that database numbers start from 0 and run till n-1
+
+% n = 217;
+% img_name = 'M:\iCV\Face Scan\Temp\eric3_rotated_openFace\20.png';
+% dbFolder = 'M:\iCV\Face Scan\Temp\database';
+
+%% read in databases
+disp('Finding closest regions');
+parfor i = 1:n
+    eyesDB{i} = imread(fullfile(dbFolder, 'eyes', sprintf('male%03d.png', i - 1)));
+    noseDB{i} = imread(fullfile(dbFolder, 'nose', sprintf('male%03d.png', i - 1)));
+    mouthDB{i} = imread(fullfile(dbFolder, 'mouth', sprintf('male%03d.png', i - 1)));
+%     faceDB{i} = imread(fullfile(dbFolder, 'face', sprintf('male%03d.png', i - 1)));
+    faceDB{i} = imread(fullfile(dbFolder, 'fullFace', sprintf('male%03d.png', i - 1)));
+end
+disp('Finished reading DBs');
+
+% read in testimg & extract regions from it
+[pathstr, name, ~] = fileparts(img_name);
+pts_name = fullfile(pathstr, sprintf('%s_2d.txt', name));
+img_eyes = extractRegion(img_name, pts_name, 2);
+img_nose = extractRegion(img_name, pts_name, 3);
+img_mouth = extractRegion(img_name, pts_name, 4);
+% img_face = extractRegion(img_name, pts_name, 1);
+img_face = extractRegion(img_name, pts_name, 0);
+
+% find closest from database
+% [closestEyesIdx,  errorEyes]  = ssim_info(eyesDB, img_eyes);
+% [closestNoseIdx,  errorNose]  = ssim_info(noseDB, img_nose);
+[closestMouthIdx, errorMouth] = ssim_info(mouthDB, img_mouth);
+[closestFaceIdx,  errorFace]  = getClosestPCA(faceDB, img_face);
+% [closestFaceIdx,  errorFace]  = ssim_info(faceDB, img_face);
+% [closestFaceIdx,  errorFace]  = lbpf_info(faceDB, img_face);
+[closestEyesIdx,  errorEyes]  = lbpf_info(eyesDB, img_eyes);
+% [closestNoseIdx,  errorNose]  = lbpf_info(noseDB, img_nose);
+% [closestMouthIdx, errorMouth] = lbpf_info(mouthDB, img_mouth);
+
+% weights
+wEyes = getWeights(errorEyes, 2);
+wNose = getWeights(errorNose, 3);
+wMouth = getWeights(errorMouth, 4);
+wFace = getWeights(errorFace, 1);
+
+% display info
+fprintf('Eyes: %d ', closestEyesIdx - 1);
+fprintf('Nose: %d ', closestNoseIdx - 1);
+fprintf('Mouth: %d ', closestMouthIdx - 1);
+fprintf('Face: %d\n', closestFaceIdx - 1);
+
+% % plot
+% figure('name', 'Errors'); 
+% plot(0:n-1, errorEyes, 0:n-1, errorNose, 0:n-1, errorMouth);
+% legend('Eyes','Nose','Mouth');
+% figure('name', 'Weights'); 
+% plot(0:n-1, wEyes, 0:n-1, wNose, 0:n-1, wMouth, 0:n-1, wFace);
+% legend('Eyes','Nose','Mouth','Face');
+
+end
