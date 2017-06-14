@@ -12,15 +12,19 @@ Advisable to create: __output__ and __input__ folders also. __input__ for videos
 
 ## Assets
 * openface  
-  Openface binaries folder, https://github.com/TadasBaltrusaitis/OpenFace/wiki/Windows-Installation
+  Please add Openface binaries here, https://github.com/TadasBaltrusaitis/OpenFace/wiki/Windows-Installation
+* texture  
+  Folder containing average texture and manually mapped feature points location on the texture.
+  
+Database models and renders are not included in this repository. In order to gain access, please contact icv.eesti@gmail.com.
+
 * wrapped_models  
   Currently assumed to be named __male###.obj__ starting from 0.
 * renders  
   2d frontal renders from models with diffuse top down lighting
 * regions_db  
   Normalised images from renders - heads are scaled approximately same size using OpenFace features. Then cutouts of regions are saved into separate folders.
-* texture  
-  Folder containing average texture and manually mapped feature points location on the texture.
+
 
 ## Code
 Files to change/use
